@@ -6,12 +6,21 @@ let th = require('./testHelper.js');
 
 describe('app',()=>{
   describe('GET /',()=>{
-    it('redirects to login.html',done=>{
+    it('should serve the login page',done=>{
       request(app,{method:'GET',url:'/'},(res)=>{
-        th.should_be_redirected_to(res,'/login.html');
-        assert.equal(res.body,"");
-        done();
+        th.status_is_ok(res);
+        th.body_contains(res,"login page");
       })
+      done();
+    })
+  }),
+  describe('GET /login',()=>{
+    it('should serve the login page',done=>{
+      request(app,{method:'GET',url:'/login'},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"login page");
+      })
+        done();
     })
   })
 })

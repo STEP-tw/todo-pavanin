@@ -1,0 +1,26 @@
+{
+  "name": "todo-pavanin",
+  "version": "1.0.0",
+  "description": "## Objective",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/STEP-tw/todo-pavanin.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/STEP-tw/todo-pavanin/issues"
+  },
+  "homepage": "https://github.com/STEP-tw/todo-pavanin#readme",
+  "dependencies": {
+    "chai": "^4.1.2"
+  }
+}
