@@ -4,7 +4,7 @@ const fs= require("fs");
 const User = require('./src/models/user.js');
 //initizing with pavani as userName
 let registered_users= [{"userName":"pavani"}]
-
+let session = {};
 let getUserName= function(user){
   return user.userName;
 }
@@ -28,9 +28,16 @@ let loadUser = (req,res)=>{
   }
 };
 
+let redirectifNotLoggedIn= function(req,url){
+  if(req.cookies.sessionid){
+    res.redirect(url);
+    return;
+  }
+}
+
 let handleGetLogin=(req,res)=>{
-  let user= registered_users.find(name=>name.userName==req.cookies.user);
-  if(req.cookies.loggedIn&&user){
+  let user= registered_users.find(name=>name.userName==req.body.userName);
+  if(req.cookies.sessionid){
     res.redirect("/home");
     return;
   }
@@ -47,8 +54,28 @@ let handlePostLogin= (req,res)=>{
     res.redirect('/login');
     return;
   }
-  res.setHeader("Set-Cookie",[`loggedIn=true`,`user=${getUserName(user)}`]);
+  let userName=getUserName(user);
+  let sessionId = new Date().getTime();
+  session[sessionId]=new User(userName);
+  res.setHeader("Set-Cookie",`sessionid=${sessionId}`);
   res.redirect("/home");
+}
+
+let handleAddTodo= function(req,res){
+  redirectifNotLoggedIn(req,"/login");
+  let user=session[req.cookies.sessionid];
+  let title= req.body.title;
+  let description= req.body.description;
+  user.addTodo(title,description);
+  res.redirect("/home");
+}
+
+let handleNewTodo= function(req,res){
+  redirectifNotLoggedIn(req,"/login");
+  let contents= fs.readFileSync("./newTodo.html",'utf8');
+  res.setHeader('content-type',"text/html");
+  res.write(contents);
+  res.end();
 }
 
 let handleGetHome= function(req,res){
@@ -65,7 +92,7 @@ let handleGetHome= function(req,res){
 }
 
 let handleLogout= function(req,res){
-  res.setHeader("Set-Cookie",[`loggedIn=false; Max-Age=5`,`user=; Max-Age=5`])
+  res.setHeader("Set-Cookie",`sessionid=0; Max-Age=1`)
   res.redirect("/");
 }
 
@@ -76,5 +103,8 @@ app.get("/",handleGetLogin);
 app.get("/login",handleGetLogin);
 app.get("/home",handleGetHome);
 app.get("/logout",handleLogout);
+app.get("/newTodo",handleNewTodo);
 app.post("/login",handlePostLogin);
+app.post("/addTodo",handleAddTodo);
+app.addCustomSession =(customSession)=> session = customSession;
 module.exports=app;

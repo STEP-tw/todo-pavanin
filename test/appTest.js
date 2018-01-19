@@ -2,6 +2,7 @@ let chai = require('chai');
 let assert = chai.assert;
 let request = require('./requestSimulator.js');
 let app = require('../app.js');
+let User = require('../src/models/user.js');
 let th = require('./testHelper.js');
 
 describe('app',()=>{
@@ -49,7 +50,8 @@ describe('app',()=>{
       })
     })
     it('should redirect to home page when user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"loggedIn=true; user=pavani"}},(res)=>{
+      app.addCustomSession({0:new User('pavani')});
+      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
       })
@@ -113,8 +115,9 @@ describe('app',()=>{
         done();
       })
     })
-    it('should serve login page if the user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pavani",headers:{cookie:"loggedIn=true; user=pavani"}},(res)=>{
+    it('should redirect to home page if the user is valid and cookie is valid',done=>{
+      app.addCustomSession({0:new User('pavani')});
+      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
       })
@@ -142,8 +145,9 @@ describe('app',()=>{
         done();
     })
     it("should set a cookie loggedIn for valid user",done=>{
+
       request(app,{method:"POST",url:"/login",body:"userName=pavani"},(res)=>{
-        th.should_have_cookie(res,"loggedIn","true");
+        th.should_have_cookie_field(res,"sessionid");
       })
       done();
     })
@@ -176,8 +180,7 @@ describe('app',()=>{
     })
     it("should have a expiring cookie",()=>{
       request(app,{method:'GET',url:'/logout'},(res)=>{
-        th.should_have_expiring_cookie(res,"loggedIn","false");
-        th.should_have_expiring_cookie(res,"user","");
+        th.should_have_expiring_cookie(res,"sessionid","0");
       })
     })
   })
