@@ -1,5 +1,6 @@
 const Item = require('./item.js');
-const Todo = function(title,description) {
+const Todo = function(id,title,description) {
+  this.id=id;
   this.title = title;
   this.description = description || '';
   this.items = {};

@@ -13,8 +13,11 @@ class User{
   getTodos(){
     return this.todos;
   }
+  getTodo(id){
+    return this.todos[id];
+  }
   addTodo(title,description){
-    let todo=new Todo(title,description);
+    let todo=new Todo(this.todoId,title,description);
     this.todos[this.todoId]=todo;
     this.todoId++;
   }
@@ -40,7 +43,7 @@ class User{
     this.todos[todoId].markItem(itemId);
   }
   unmarkTodoItem(todoId,itemId){
-    this.todos[todoId].markItem(itemId);
+    this.todos[todoId].unmarkItem(itemId);
   }
 }
 module.exports= User;

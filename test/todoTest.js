@@ -6,7 +6,7 @@ let Item = require("../src/models/item.js");
 describe("todo",()=>{
   let todo
   beforeEach(()=>{
-    todo = new Todo("title","description");
+    todo = new Todo("0","title","description");
   })
   describe("addItem",()=>{
     it("should addItem to the todo",()=>{
@@ -36,12 +36,13 @@ describe("todo",()=>{
       expected={}
       assert.deepEqual(todo.getItems(),expected);
     })
-    it("should delete the item",()=>{
+    it("should delete one the item",()=>{
       let first="firstItem";
       let second="secondItem";
       todo.addItem(first);
       todo.addItem(second);
       todo.deleteItem(1);
+      console.log(todo.getItems());
       expected={};
       expected[0]=new Item(first);
       assert.deepEqual(todo.getItems(),expected);

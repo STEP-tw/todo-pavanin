@@ -21,14 +21,14 @@ let logRequest = (req,res)=>{
 };
 
 let loadUser = (req,res)=>{
-  let loggedIn = req.cookies.loggedIn;
+  let sessionid = req.cookies.sessionid;
   let user = registered_users.find(name=>name.userName==req.body.userName);
-  if(user&&loggedIn){
+  if(user&&sessionid){
     req.user = user;
   }
 };
 
-let redirectifNotLoggedIn= function(req,url){
+let redirectifNotLoggedIn= function(req,res,url){
   if(req.cookies.sessionid){
     res.redirect(url);
     return;
@@ -36,7 +36,6 @@ let redirectifNotLoggedIn= function(req,url){
 }
 
 let handleGetLogin=(req,res)=>{
-  let user= registered_users.find(name=>name.userName==req.body.userName);
   if(req.cookies.sessionid){
     res.redirect("/home");
     return;
@@ -49,6 +48,7 @@ let handleGetLogin=(req,res)=>{
 
 let handlePostLogin= (req,res)=>{
   let user = registered_users.find(name=>name.userName==req.body.userName);
+  console.log(user);
   if(!user) {
     res.setHeader('Set-Cookie',`message=loginFailed; Max-Age=5`);
     res.redirect('/login');
@@ -58,20 +58,28 @@ let handlePostLogin= (req,res)=>{
   let sessionId = new Date().getTime();
   session[sessionId]=new User(userName);
   res.setHeader("Set-Cookie",`sessionid=${sessionId}`);
+  user.sessionid=sessionId;
   res.redirect("/home");
 }
 
 let handleAddTodo= function(req,res){
-  redirectifNotLoggedIn(req,"/login");
+  if(!req.cookies.sessionid){
+    res.redirect("/login");
+    return;
+  }
   let user=session[req.cookies.sessionid];
   let title= req.body.title;
   let description= req.body.description;
   user.addTodo(title,description);
-  res.redirect("/home");
+  console.log(user);
+  res.redirect("/todos");
 }
 
 let handleNewTodo= function(req,res){
-  redirectifNotLoggedIn(req,"/login");
+  if(!req.cookies.sessionid){
+    res.redirect("/login");
+    return;
+  }
   let contents= fs.readFileSync("./newTodo.html",'utf8');
   res.setHeader('content-type',"text/html");
   res.write(contents);
@@ -79,8 +87,7 @@ let handleNewTodo= function(req,res){
 }
 
 let handleGetHome= function(req,res){
-  let user= registered_users.find(name=>name.userName==req.cookies.user);
-  if(user&&req.cookies.loggedIn){
+  if(req.cookies.sessionid){
     let contents= fs.readFileSync("./home.html",'utf8');
     res.setHeader('content-type',"text/html");
     res.write(contents.replace("_userName_",req.cookies.user));
@@ -92,7 +99,7 @@ let handleGetHome= function(req,res){
 }
 
 let handleLogout= function(req,res){
-  res.setHeader("Set-Cookie",`sessionid=0; Max-Age=1`)
+  res.setHeader("Set-Cookie",`sessionid=0; Max-Age=0`)
   res.redirect("/");
 }
 

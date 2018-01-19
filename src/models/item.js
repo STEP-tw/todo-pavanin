@@ -22,10 +22,6 @@ Item.prototype={
 
   getObjective:function(){
     return this.objective;
-  },
-
-  getId:function(){
-    return this.id;
   }
 
 }
