@@ -1,8 +1,8 @@
 let chai = require('chai');
 let assert = chai.assert;
-let Todo = require("../src/models/todo.js");
-let Item = require("../src/models/item.js");
-let User = require("../src/models/user.js");
+let Todo = require("../src/todo.js");
+let Item = require("../src/item.js");
+let User = require("../src/user.js");
 
 describe("user",()=>{
   let user

@@ -1,7 +1,7 @@
 let chai = require('chai');
 let assert = chai.assert;
-let Todo = require("../src/models/todo.js");
-let Item = require("../src/models/item.js");
+let Todo = require("../src/todo.js");
+let Item = require("../src/item.js");
 
 describe("todo",()=>{
   let todo

@@ -2,7 +2,7 @@ let chai = require('chai');
 let assert = chai.assert;
 let request = require('./requestSimulator.js');
 let app = require('../app.js');
-let User = require('../src/models/user.js');
+let User = require('../src/user.js');
 let th = require('./testHelper.js');
 
 describe('app',()=>{
@@ -50,7 +50,6 @@ describe('app',()=>{
       })
     })
     it('should redirect to home page when user is valid and cookie is valid',done=>{
-      app.addCustomSession({0:new User('pavani')});
       request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
@@ -115,8 +114,7 @@ describe('app',()=>{
         done();
       })
     })
-    it('should redirect to home page if the user is valid and cookie is valid',done=>{
-      app.addCustomSession({0:new User('pavani')});
+    it('should redirect to home page when user is valid and cookie is valid',done=>{
       request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
@@ -131,29 +129,10 @@ describe('app',()=>{
     })
   })
 
-  describe('POST /login',()=>{
-    it('should Redirect to home page if valid user',done=>{
-      request(app,{method:'POST',url:'/login',body:"userName=pavani"},(res)=>{
-        th.should_be_redirected_to(res,"/home");
-      })
-        done();
-    })
-    it('should Redirect to login page if invalid user',done=>{
-      request(app,{method:'POST',url:'/login',body:"userName=bhavani"},(res)=>{
-        th.should_be_redirected_to(res,"/login");
-      })
-        done();
-    })
-    it("should set a cookie loggedIn for valid user",done=>{
-
-      request(app,{method:"POST",url:"/login",body:"userName=pavani"},(res)=>{
-        th.should_have_cookie_field(res,"sessionid");
-      })
-      done();
-    })
-    it("should have an expiring cookie for invalid user",done=>{
-      request(app,{method:"POST",url:"/login",body:"userName=pani"},(res)=>{
-        th.should_have_expiring_cookie(res,"message","loginFailed");
+  describe('POST /addTodo',()=>{
+    it("should add new Todo in specified user",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
       })
       done();
     })
@@ -172,6 +151,22 @@ describe('app',()=>{
     })
   })
 
+  describe('GET /newTodo',()=>{
+    it("should serve the newTodo page",(done)=>{
+      request(app,{method:'GET',url:'/newTodo',headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"<title>newTodo</title>");
+      })
+      done();
+    })
+    it("should redirect to login page",(done)=>{
+      request(app,{method:'GET',url:'/newTodo',headers:{cookie:"sessionidd=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/login");
+      })
+      done();
+    })
+  })
+
   describe('GET /logout',()=>{
     it("should redirect to login page",()=>{
       request(app,{method:'GET',url:'/logout'},(res)=>{
@@ -184,4 +179,33 @@ describe('app',()=>{
       })
     })
   })
+
+  describe('POST /login',()=>{
+    it('should Redirect to home page if valid user',done=>{
+      request(app,{method:'POST',url:'/login',body:"userName=pavani"},(res)=>{
+        th.should_be_redirected_to(res,"/home");
+      })
+      done();
+    })
+    it('should Redirect to login page if invalid user',done=>{
+      request(app,{method:'POST',url:'/login',body:"userName=bhavani"},(res)=>{
+        th.should_be_redirected_to(res,"/login");
+      })
+      done();
+    })
+    it("should set a cookie loggedIn for valid user",done=>{
+
+      request(app,{method:"POST",url:"/login",body:"userName=pavani"},(res)=>{
+        th.should_have_cookie_field(res,"sessionid");
+      })
+      done();
+    })
+    it("should have an expiring cookie for invalid user",done=>{
+      request(app,{method:"POST",url:"/login",body:"userName=pani"},(res)=>{
+        th.should_have_expiring_cookie(res,"message","loginFailed");
+      })
+      done();
+    })
+  })
+
 })

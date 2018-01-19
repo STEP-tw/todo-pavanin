@@ -1,10 +1,18 @@
 const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
 const fs= require("fs");
-const User = require('./src/models/user.js');
+const User = require('./src/user.js');
+const toS=function(content){
+  return JSON.stringify(content);
+}
 //initizing with pavani as userName
-let registered_users= [{"userName":"pavani"}]
-let session = {};
+let registered_users= [{"userName":"pavani","sessionid":"0"},{"userName":"harshad","sessionid":"1"}];
+
+let session = {
+  'pavani':new User('Pavani'),
+  'harshad':new User('harshad')
+}
+
 let getUserName= function(user){
   return user.userName;
 }
@@ -12,28 +20,29 @@ let getUserName= function(user){
 let logRequest = (req,res)=>{
   let text = ['------------------------------',
     `${timeStamp()}`,
-    `${JSON.stringify(req.method,null,2)} ${JSON.stringify(req.url,null,2)}`,
-    `HEADERS=> ${JSON.stringify(req.headers,null,2)}`,
-    `COOKIES=> ${JSON.stringify(req.cookies,null,2)}`,
-    `BODY=> ${JSON.stringify(req.body,null,2)}`,''].join('\n');
+    `${toS(req.method,null,2)} ${toS(req.url,null,2)}`,
+    `HEADERS=> ${toS(req.headers,null,2)}`,
+    `COOKIES=> ${toS(req.cookies,null,2)}`,
+    `BODY=> ${toS(req.body,null,2)}`,''].join('\n');
   fs.appendFile('request.log',text,()=>{});
   console.log(`${req.method} ${req.url}`);
 };
 
 let loadUser = (req,res)=>{
   let sessionid = req.cookies.sessionid;
-  let user = registered_users.find(name=>name.userName==req.body.userName);
+  let user = registered_users.find(u=>u.sessionid==sessionid);
+  //console.log(user);
   if(user&&sessionid){
     req.user = user;
   }
 };
 
-let redirectifNotLoggedIn= function(req,res,url){
-  if(req.cookies.sessionid){
-    res.redirect(url);
-    return;
-  }
-}
+// let redirectifNotLoggedIn= function(req,res,url){
+//   if(req.cookies.sessionid){
+//     res.redirect(url);
+//     return;
+//   }
+// }
 
 let handleGetLogin=(req,res)=>{
   if(req.cookies.sessionid){
@@ -56,7 +65,6 @@ let handlePostLogin= (req,res)=>{
   }
   let userName=getUserName(user);
   let sessionId = new Date().getTime();
-  session[sessionId]=new User(userName);
   res.setHeader("Set-Cookie",`sessionid=${sessionId}`);
   user.sessionid=sessionId;
   res.redirect("/home");
@@ -67,12 +75,33 @@ let handleAddTodo= function(req,res){
     res.redirect("/login");
     return;
   }
-  let user=session[req.cookies.sessionid];
+  // console.log(req.cookies.sessionid);
+  // let sessionid = registered_users.find(name=>{
+  //   console.log(name.sessionid);
+  //   name.sessionid==req.cookies.sessionid
+  // });
+  //let user=session[sessionid["userName"]];
+  let user=session[req.user.userName]
   let title= req.body.title;
-  let description= req.body.description;
+  let description= req.body.description||"";
   user.addTodo(title,description);
-  console.log(user);
+  console.log(session);
   res.redirect("/todos");
+}
+
+let handleAddTodoItem= function(req,res){
+  if(!req.cookies.sessionid){
+    res.redirect("/login");
+    return;
+  }
+  let sessionid = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[sessionid["userName"]];
+  let todoId= req.body.todoId;
+  let objective= req.body.objective;
+  user.addTodoItem(objective,todoId);
+  console.log(session);
+  res.write(toS(user.getTodo(todoId)));
+  res.end();
 }
 
 let handleNewTodo= function(req,res){
@@ -95,7 +124,6 @@ let handleGetHome= function(req,res){
     return;
   }
   res.redirect("/login");
-
 }
 
 let handleLogout= function(req,res){
@@ -108,10 +136,10 @@ app.use(logRequest);
 app.use(loadUser);
 app.get("/",handleGetLogin);
 app.get("/login",handleGetLogin);
+app.post("/login",handlePostLogin);
 app.get("/home",handleGetHome);
 app.get("/logout",handleLogout);
 app.get("/newTodo",handleNewTodo);
-app.post("/login",handlePostLogin);
 app.post("/addTodo",handleAddTodo);
-app.addCustomSession =(customSession)=> session = customSession;
+app.post("/addTodoItem",handleAddTodoItem);
 module.exports=app;

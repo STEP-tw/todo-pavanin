@@ -1,6 +1,6 @@
 let chai = require('chai');
 let assert = chai.assert;
-let Item = require("../src/models/item.js");
+let Item = require("../src/item.js");
 
 describe("item",()=>{
   let item;
