@@ -1,6 +1,5 @@
-const Item= function(objective,id){
+const Item= function(objective){
   this.objective=objective;
-  this.id=id;
   this.status=false;
 }
 
@@ -13,7 +12,7 @@ Item.prototype={
     this.status=true;
   },
 
-  unMark:function(){
+  unmark:function(){
     this.status=false;
   },
 

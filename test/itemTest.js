@@ -5,7 +5,7 @@ let Item = require("../src/models/item.js");
 describe("item",()=>{
   let item;
   beforeEach(()=>{
-    item = new Item("todo item","90")
+    item = new Item("todo item")
   })
   describe("modify item",()=>{
     it("should modify the objective of the item",()=>{
@@ -28,13 +28,8 @@ describe("item",()=>{
       assert.isOk(item.isDone());
     }),
     it("should return false when the item is not marked",()=>{
-      item.unMark();
+      item.unmark();
       assert.isNotOk(item.isDone());
-    })
-  })
-  describe("getId",()=>{
-    it("should return the id of the item",()=>{
-      assert.deepEqual(item.getId(),"90");
     })
   })
 })

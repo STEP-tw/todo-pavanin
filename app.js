@@ -1,10 +1,9 @@
 const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
 const fs= require("fs");
+const User = require('./src/models/user.js');
+//initizing with pavani as userName
 let registered_users= [{"userName":"pavani"}]
-let RedirectToLoginpage=(req,res)=>{
-  if(req.url=="/") res.redirect("/login.html")
-}
 
 let getUserName= function(user){
   return user.userName;
@@ -30,7 +29,8 @@ let loadUser = (req,res)=>{
 };
 
 let handleGetLogin=(req,res)=>{
-  if(req.cookies.loggedIn&&req.user){
+  let user= registered_users.find(name=>name.userName==req.cookies.user);
+  if(req.cookies.loggedIn&&user){
     res.redirect("/home");
     return;
   }
@@ -48,13 +48,11 @@ let handlePostLogin= (req,res)=>{
     return;
   }
   res.setHeader("Set-Cookie",[`loggedIn=true`,`user=${getUserName(user)}`]);
-  // res.setHeader("Set-Cookie");
   res.redirect("/home");
 }
 
 let handleGetHome= function(req,res){
   let user= registered_users.find(name=>name.userName==req.cookies.user);
-console.log(req.cookies.loggedIn);
   if(user&&req.cookies.loggedIn){
     let contents= fs.readFileSync("./home.html",'utf8');
     res.setHeader('content-type',"text/html");
@@ -79,5 +77,4 @@ app.get("/login",handleGetLogin);
 app.get("/home",handleGetHome);
 app.get("/logout",handleLogout);
 app.post("/login",handlePostLogin);
-
 module.exports=app;

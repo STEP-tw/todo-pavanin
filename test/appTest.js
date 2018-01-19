@@ -49,7 +49,7 @@ describe('app',()=>{
       })
     })
     it('should redirect to home page when user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"loggedIn=true"}},(res)=>{
+      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"loggedIn=true; user=pavani"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
       })
@@ -114,7 +114,7 @@ describe('app',()=>{
       })
     })
     it('should serve login page if the user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pavani",headers:{cookie:"loggedIn=true"}},(res)=>{
+      request(app,{method:"GET",url:"/login",body:"userName=pavani",headers:{cookie:"loggedIn=true; user=pavani"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
       })
@@ -170,12 +170,12 @@ describe('app',()=>{
 
   describe('GET /logout',()=>{
     it("should redirect to login page",()=>{
-      request(app,{method:'GET',url:'/logout',body:"userName=pavani"},(res)=>{
+      request(app,{method:'GET',url:'/logout'},(res)=>{
         th.should_be_redirected_to(res,"/");
       })
     })
     it("should have a expiring cookie",()=>{
-      request(app,{method:'GET',url:'/logout',body:"userName=pavani"},(res)=>{
+      request(app,{method:'GET',url:'/logout'},(res)=>{
         th.should_have_expiring_cookie(res,"loggedIn","false");
         th.should_have_expiring_cookie(res,"user","");
       })
