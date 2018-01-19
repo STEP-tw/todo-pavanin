@@ -138,6 +138,21 @@ describe('app',()=>{
     })
   })
 
+  describe('POST /addTodoItem',()=>{
+    it("should add new Item in specified user's Todo",(done)=>{
+      request(app,{method:"GET",url:"/login",body:"userName=pani",headers:{cookie:"loggedIn=true"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"login page");
+        done();
+      })
+      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"itemId=1");
+      })
+      done();
+    })
+  })
+
   describe('GET /home',()=>{
     it("should redirect to login page if user is not logged in",()=>{
       request(app,{method:"GET",url:"/home"},(res)=>{

@@ -31,18 +31,10 @@ let logRequest = (req,res)=>{
 let loadUser = (req,res)=>{
   let sessionid = req.cookies.sessionid;
   let user = registered_users.find(u=>u.sessionid==sessionid);
-  //console.log(user);
   if(user&&sessionid){
     req.user = user;
   }
 };
-
-// let redirectifNotLoggedIn= function(req,res,url){
-//   if(req.cookies.sessionid){
-//     res.redirect(url);
-//     return;
-//   }
-// }
 
 let handleGetLogin=(req,res)=>{
   if(req.cookies.sessionid){
@@ -75,17 +67,10 @@ let handleAddTodo= function(req,res){
     res.redirect("/login");
     return;
   }
-  // console.log(req.cookies.sessionid);
-  // let sessionid = registered_users.find(name=>{
-  //   console.log(name.sessionid);
-  //   name.sessionid==req.cookies.sessionid
-  // });
-  //let user=session[sessionid["userName"]];
   let user=session[req.user.userName]
   let title= req.body.title;
   let description= req.body.description||"";
   user.addTodo(title,description);
-  console.log(session);
   res.redirect("/todos");
 }
 
@@ -99,7 +84,6 @@ let handleAddTodoItem= function(req,res){
   let todoId= req.body.todoId;
   let objective= req.body.objective;
   user.addTodoItem(objective,todoId);
-  console.log(session);
   res.write(toS(user.getTodo(todoId)));
   res.end();
 }
