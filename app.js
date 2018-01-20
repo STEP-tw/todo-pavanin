@@ -105,6 +105,15 @@ let getTodos= function(req,res){
   res.end();
 }
 
+let getTodo= function(req,res){
+  redirect(req,res);
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let todo=user.getTodo(todoId);
+  res.write(todo);
+  res.end();
+}
 
 let handleGetHome= function(req,res){
   if(req.cookies.sessionid){
