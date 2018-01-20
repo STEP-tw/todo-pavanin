@@ -6,70 +6,6 @@ let User = require('../src/user.js');
 let th = require('./testHelper.js');
 
 describe('app',()=>{
-  describe('GET /',()=>{
-    it('should serve the login page when user is not loggedin',done=>{
-      request(app,{method:'GET',url:'/'},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-      })
-      done();
-    })
-    it('should serve the login page when cookie is valid but no user',done=>{
-      request(app,{method:"GET",url:"/",headers:{cookie:"loggedIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page when cookie is invalid and no user',done=>{
-      request(app,{method:"GET",url:"/",headers:{cookie:"logIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve the login page when user is valid but no cookie',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavani"},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page when user is invalid and no cookie',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavni"},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page when user and cookie are invalid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavni",headers:{cookie:"logIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should redirect to home page when user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"sessionid=0"}},(res)=>{
-        th.should_be_redirected_to(res,"/home");
-        done();
-      })
-    })
-    it('should serve login page when user is valid and cookie is invalid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"logIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page when user is invalid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pani",headers:{cookie:"loggedIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-  }),
 
   describe("GET /login",()=>{
     it('should serve the login page when user isNot loggedIn',done=>{
@@ -79,51 +15,16 @@ describe('app',()=>{
       })
       done();
     })
-    it('should serve the login page if the cookie is valid but no user',done=>{
+    it('should serve the login page if the cookie is invalid',done=>{
       request(app,{method:"GET",url:"/login",headers:{cookie:"loggedIn=true"}},(res)=>{
         th.status_is_ok(res);
         th.body_contains(res,"login page");
         done();
       })
     })
-    it('should serve login page if the cookie is invalid',done=>{
-      request(app,{method:"GET",url:"/login",headers:{cookie:"logIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page if the user is invalid',done=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pavni"},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page if the user and cookie is invalid',done=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pavni",headers:{cookie:"logIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
-    it('should serve login page if the user is valid and cookie is invalid',done=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pavani",headers:{cookie:"logIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
-      })
-    })
     it('should redirect to home page when user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/",body:"userName=pavani",headers:{cookie:"sessionid=0"}},(res)=>{
+      request(app,{method:"GET",url:"/",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
-        done();
-      })
-    })
-    it('should serve login page if the user is invalid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pani",headers:{cookie:"loggedIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
         done();
       })
     })
@@ -140,14 +41,12 @@ describe('app',()=>{
 
   describe('POST /addTodoItem',()=>{
     it("should add new Item in specified user's Todo",(done)=>{
-      request(app,{method:"GET",url:"/login",body:"userName=pani",headers:{cookie:"loggedIn=true"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,"login page");
-        done();
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
       })
       request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,"itemId=1");
+        th.body_contains(res,'"itemId":1');
       })
       done();
     })
@@ -160,8 +59,14 @@ describe('app',()=>{
       })
     })
     it("should redirect to login page if cookie is invalid",()=>{
-      request(app,{method:"GET",url:"/home",headers:{cookie:"loggedIn=true; user=pavni"}},(res)=>{
+      request(app,{method:"GET",url:"/home",headers:{cookie:"loggedIn=true"}},(res)=>{
         th.should_be_redirected_to(res,"/login")
+      })
+    })
+    it("should serve the home page if cookie id valid",()=>{
+      request(app,{method:"GET",url:"/home",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"pavani")
       })
     })
   })
@@ -185,11 +90,11 @@ describe('app',()=>{
   describe('GET /logout',()=>{
     it("should redirect to login page",()=>{
       request(app,{method:'GET',url:'/logout'},(res)=>{
-        th.should_be_redirected_to(res,"/");
+        th.should_be_redirected_to(res,"/login");
       })
     })
     it("should have a expiring cookie",()=>{
-      request(app,{method:'GET',url:'/logout'},(res)=>{
+      request(app,{method:'GET',url:'/logout',headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_have_expiring_cookie(res,"sessionid","0");
       })
     })
