@@ -13,6 +13,13 @@ let session = {
   'harshad':new User('harshad')
 }
 
+
+let redirect=function(req,res){
+  if(!req.cookies.sessionid){
+    res.redirect("/login");
+    return;
+  }
+}
 let getUserName= function(user){
   return user.userName;
 }
@@ -49,7 +56,6 @@ let handleGetLogin=(req,res)=>{
 
 let handlePostLogin= (req,res)=>{
   let user = registered_users.find(name=>name.userName==req.body.userName);
-  console.log(user);
   if(!user) {
     res.setHeader('Set-Cookie',`message=loginFailed; Max-Age=5`);
     res.redirect('/login');
@@ -63,22 +69,17 @@ let handlePostLogin= (req,res)=>{
 }
 
 let handleAddTodo= function(req,res){
-  if(!req.cookies.sessionid){
-    res.redirect("/login");
-    return;
-  }
+  redirect(req,res);
   let user=session[req.user.userName]
   let title= req.body.title;
   let description= req.body.description||"";
   user.addTodo(title,description);
+  console.log(user);
   res.redirect("/todos");
 }
 
 let handleAddTodoItem= function(req,res){
-  if(!req.cookies.sessionid){
-    res.redirect("/login");
-    return;
-  }
+  redirect(req,res);
   let sessionid = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
   let user=session[sessionid["userName"]];
   let todoId= req.body.todoId;
@@ -87,17 +88,23 @@ let handleAddTodoItem= function(req,res){
   res.write(toS(user.getTodo(todoId)));
   res.end();
 }
-
 let handleNewTodo= function(req,res){
-  if(!req.cookies.sessionid){
-    res.redirect("/login");
-    return;
-  }
+  redirect(req,res);
   let contents= fs.readFileSync("./newTodo.html",'utf8');
   res.setHeader('content-type',"text/html");
   res.write(contents);
   res.end();
 }
+
+let getTodos= function(req,res){
+  redirect(req,res);
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let allTodos=user.getTodos();
+  res.write(allTodos);
+  res.end();
+}
+
 
 let handleGetHome= function(req,res){
   if(req.cookies.sessionid){
