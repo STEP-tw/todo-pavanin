@@ -42,7 +42,6 @@ describe("todo",()=>{
       todo.addItem(first);
       todo.addItem(second);
       todo.deleteItem(1);
-      console.log(todo.getItems());
       expected={};
       expected[0]=new Item(first);
       assert.deepEqual(todo.getItems(),expected);

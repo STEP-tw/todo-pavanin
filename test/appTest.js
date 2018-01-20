@@ -23,7 +23,7 @@ describe('app',()=>{
       })
     })
     it('should redirect to home page when user is valid and cookie is valid',done=>{
-      request(app,{method:"GET",url:"/",headers:{cookie:"sessionid=0"}},(res)=>{
+      request(app,{method:"GET",url:"/login",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
       })
@@ -39,6 +39,32 @@ describe('app',()=>{
     })
   })
 
+  describe('GET /getTodo',()=>{
+    it("should give the particular todo of specified user",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'GET',url:'/getTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"title":"newTodo"')
+      })
+      done();
+    })
+  })
+
+  describe('GET /getTodos',()=>{
+    it("should give the todos of  specified user",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'GET',url:'/getTodos',headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"title":"newTodo"')
+      })
+      done();
+    })
+  })
+
   describe('POST /addTodoItem',()=>{
     it("should add new Item in specified user's Todo",(done)=>{
       request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
@@ -46,7 +72,118 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"itemId":1');
+        th.body_contains(res,'"id":0');
+      })
+      done();
+    })
+  })
+
+  describe('POST /modifyTitle',()=>{
+    it("should modify the title of the todo in specified user's Todo",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/modifyTodoTitle',body:`todoId=0&todoTitle=newtitle`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"title":"newtitle"');
+      })
+      done();
+    })
+  })
+
+  describe('POST /modifyTodoDescription',()=>{
+      it("should modify the description of the todo in specified user's Todo",(done)=>{
+        request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+          th.should_be_redirected_to(res,"/todos");
+        })
+        request(app,{method:'POST',url:'/modifyTodoDescription',body:`todoId=0&todoDescription=new`,headers:{cookie:"sessionid=0"}},(res)=>{
+          th.status_is_ok(res);
+          th.body_contains(res,'"description":"new"');
+        })
+        done();
+      })
+    })
+
+  describe('POST /modifyTodoItem',()=>{
+    it("should modify the particular item in specified user's Todo",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"id":0');
+      })
+      request(app,{method:"POST",url:'/modifyTodoItem',body:`todoId=0&itemId=0&objective=obj`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"objective":"obj"');
+      })
+      done();
+    })
+  })
+
+  describe('POST /markItem',()=>{
+    it("should mark particular item as done in specified user's Todo",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"id":0');
+      })
+      request(app,{method:'POST',url:'/markItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"status":true');
+      })
+      done();
+    })
+  })
+
+  describe('POST /unmarkItem',()=>{
+    it("should mark particular item as undone in specified user's Todo",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"id":0');
+      })
+      request(app,{method:'POST',url:'/markItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"status":true');
+      })
+      request(app,{method:'POST',url:'/unmarkItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"status":false');
+      })
+      done();
+    })
+  })
+
+  describe('POST /deleteTodo',()=>{
+    it("should delete the particular todo of specified user",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=Todo1&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/deleteTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'{}')
+      })
+      done();
+    })
+  })
+
+  describe('POST /deleteTodoItem',()=>{
+    it("should delete the particular todo's Item of specified user",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=Todo1&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=1&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"id":1');
+      })
+      request(app,{method:'POST',url:'/deleteTodoItem',body:"todoId=1&itemId=0",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,'"items":{}')
       })
       done();
     })

@@ -36,7 +36,6 @@ let logRequest = (req,res)=>{
     `COOKIES=> ${toS(req.cookies,null,2)}`,
     `BODY=> ${toS(req.body,null,2)}`,''].join('\n');
   fs.appendFile('request.log',text,()=>{});
-  console.log(`${req.method} ${req.url}`);
 };
 
 let loadUser = (req,res)=>{
@@ -93,6 +92,100 @@ let handleNewTodo= function(req,res){
   res.end();
 }
 
+let handleGetTodos= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let allTodos=user.getTodos();
+  res.write(toS(allTodos));
+  res.end();
+}
+
+let handleGetTodo= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
+let handleDeleteTodo= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  user.deleteTodo(todoId);
+  let todos=user.getTodos();
+  res.write(toS(todos));
+  res.end();
+}
+
+let handleDeleteTodoItem= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let itemId = req.body.itemId;
+  user.deleteTodoItem(todoId,itemId);
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
+let handleModifyTodoTitle= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let todoTitle = req.body.todoTitle;
+  user.modifyTodoTitle(todoTitle,todoId);
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
+let handleModifyDescription= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let todoDescription = req.body.todoDescription;
+  user.modifyTodoDescription(todoDescription,todoId);
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
+let handleModifyItem= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let itemId =  req.body.itemId;
+  let objective = req.body.objective;
+  user.modifyTodoItem(todoId,itemId,objective);
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
+let handleMarkTodoItem= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let todoItemId= req.body.itemId;
+  user.markTodoItem(todoId,todoItemId);
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
+let handleUnmarkTodoItem= function(req,res){
+  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=session[registeredUser["userName"]];
+  let todoId= req.body.todoId;
+  let todoItemId= req.body.itemId;
+  user.unmarkTodoItem(todoId,todoItemId);
+  let todo=user.getTodo(todoId);
+  res.write(toS(todo));
+  res.end();
+}
+
 let handleGetHome= function(req,res){
     let contents= fs.readFileSync("./home.html",'utf8');
     res.setHeader('content-type',"text/html");
@@ -119,5 +212,14 @@ app.get("/logout",handleLogout);
 app.get("/newTodo",handleNewTodo);
 app.post("/addTodo",handleAddTodo);
 app.get("/getTodos",handleGetTodos);
+app.get("/getTodo",handleGetTodo);
+app.post("/deleteTodo",handleDeleteTodo);
+app.post("/deleteTodoItem",handleDeleteTodoItem);
+app.post("/markItem",handleMarkTodoItem);
+app.post("/unmarkItem",handleUnmarkTodoItem);
 app.post("/addTodoItem",handleAddTodoItem);
+app.post("/modifyTodoItem",handleModifyItem);
+app.post("/modifyTodoDescription",handleModifyDescription);
+app.post("/modifyTodoTitle",handleModifyTodoTitle);
+
 module.exports=app;
