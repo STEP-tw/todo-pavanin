@@ -5,13 +5,17 @@ let app = require('../app.js');
 let User = require('../src/user.js');
 let th = require('./testHelper.js');
 let registered_users= [{"userName":"pavani","sessionid":0},{"userName":"harshad","sessionid":1}];
-let session = {
-  'pavani':new User('Pavani'),
-  'harshad':new User('harshad')
-}
+
 app.registered_users = registered_users;
-app.session = session;
+
 describe('app',()=>{
+  beforeEach(()=>{
+    let session = {
+      'pavani':new User('Pavani'),
+      'harshad':new User('harshad')
+    }
+    app.session = session;
+  })
 
   describe("bad url",()=>{
     it("should give 404 error",()=>{
@@ -60,7 +64,7 @@ describe('app',()=>{
       })
       request(app,{method:'GET',url:'/getTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"title":"newTodo"')
+        th.body_contains(res,`<h2 id='title'>newTodo</h2>`)
       })
       done();
     })
@@ -81,12 +85,12 @@ describe('app',()=>{
 
   describe('POST /addTodoItem',()=>{
     it("should add new Item in specified user's Todo",(done)=>{
-      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/todos");
       })
       request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"id":0');
+        th.body_contains(res,`<label for='0'>todoItem</label>`);
       })
       done();
     })
@@ -99,7 +103,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/modifyTodoTitle',body:`todoId=0&todoTitle=newtitle`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"title":"newtitle"');
+        th.body_contains(res,`<h2 id='title'>newtitle</h2>`);
       })
       done();
     })
@@ -112,7 +116,7 @@ describe('app',()=>{
         })
         request(app,{method:'POST',url:'/modifyTodoDescription',body:`todoId=0&todoDescription=new`,headers:{cookie:"sessionid=0"}},(res)=>{
           th.status_is_ok(res);
-          th.body_contains(res,'"description":"new"');
+          th.body_contains(res,`<h4 id='description'>new</h4>`);
         })
         done();
       })
@@ -125,11 +129,10 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"id":0');
       })
       request(app,{method:"POST",url:'/modifyTodoItem',body:`todoId=0&itemId=0&objective=obj`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"objective":"obj"');
+        th.body_contains(res,`<label for='0'>obj</label>`);
       })
       done();
     })
@@ -142,11 +145,10 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"id":0');
       })
       request(app,{method:'POST',url:'/markItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"status":true');
+        th.body_contains(res,`type='checkbox' id=0 checked/>`);
       })
       done();
     })
@@ -159,15 +161,29 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"id":0');
       })
       request(app,{method:'POST',url:'/markItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"status":true');
       })
       request(app,{method:'POST',url:'/unmarkItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"status":false');
+        th.body_contains(res,`type='checkbox' id=0 unchecked/>`);
+      })
+      done();
+    })
+  })
+
+  describe('POST /deleteTodoItem',()=>{
+    it("should delete the particular todo's Item of specified user",(done)=>{
+      request(app,{method:'POST',url:'/addTodo',body:"title=Todo1&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/todos");
+      })
+      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=0&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+      })
+      request(app,{method:'POST',url:'/deleteTodoItem',body:"todoId=0&itemId=0",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,`</br></br>`)
       })
       done();
     })
@@ -180,24 +196,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/deleteTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'{}')
-      })
-      done();
-    })
-  })
-
-  describe('POST /deleteTodoItem',()=>{
-    it("should delete the particular todo's Item of specified user",(done)=>{
-      request(app,{method:'POST',url:'/addTodo',body:"title=Todo1&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
-        th.should_be_redirected_to(res,"/todos");
-      })
-      request(app,{method:'POST',url:'/addTodoItem',body:`todoId=1&objective=todoItem`,headers:{cookie:"sessionid=0"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,'"id":1');
-      })
-      request(app,{method:'POST',url:'/deleteTodoItem',body:"todoId=1&itemId=0",headers:{cookie:"sessionid=0"}},(res)=>{
-        th.status_is_ok(res);
-        th.body_contains(res,'"items":{}')
+        th.body_contains(res,'<ul></ul>')
       })
       done();
     })

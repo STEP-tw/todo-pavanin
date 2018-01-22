@@ -61,6 +61,10 @@ Todo.prototype = {
     return this.getItem(itemId).getObjective();
   },
 
+  getTodoId:function(itemId){
+    return this.id;
+  },
+
   getDescription:function(){
     return this.description;
   },

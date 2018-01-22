@@ -14,7 +14,11 @@ describe("todo",()=>{
       assert.deepEqual(withOutDescription.getDescription(),"");
     })
   })
-
+  describe("getTodoId",()=>{
+    it("should give the todo id",()=>{
+      assert.equal(todo.getTodoId(),0);
+    })
+  })
   describe("addItem",()=>{
     it("should addItem to the todo",()=>{
       let objective="firstItem";

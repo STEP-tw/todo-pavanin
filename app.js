@@ -2,6 +2,7 @@ const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
 const fs= require("fs");
 const generateHtmlFor=require("./src/htmlGenerator.js");
+
 const toS=function(content){
   return JSON.stringify(content);
 }
@@ -75,7 +76,9 @@ let handleAddTodoItem= function(req,res){
   let todoId= req.body.todoId;
   let objective= req.body.objective;
   user.addTodoItem(objective,todoId);
-  res.write(toS(user.getTodo(todoId)));
+  todo=user.getTodo(todoId);
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -90,8 +93,8 @@ let handleGetTodos= function(req,res){
   let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
   let user=app.session[registeredUser["userName"]];
   let allTodos=user.getTodos();
-  let todos=generateHtmlFor.todoTitlesList(allTodos,"asdf");
-  res.write(todos);
+  let todoTitles=generateHtmlFor.todoTitlesList(allTodos,"asdf");
+  res.write(todoTitles);
   res.end();
 }
 
@@ -100,7 +103,8 @@ let handleGetTodo= function(req,res){
   let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -110,7 +114,8 @@ let handleDeleteTodo= function(req,res){
   let todoId= req.body.todoId;
   user.deleteTodo(todoId);
   let todos=user.getTodos();
-  res.write(toS(todos));
+  let todoTitles=generateHtmlFor.todoTitlesList(todos,"asdf");
+  res.write(todoTitles);
   res.end();
 }
 
@@ -121,7 +126,8 @@ let handleDeleteTodoItem= function(req,res){
   let itemId = req.body.itemId;
   user.deleteTodoItem(todoId,itemId);
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -132,7 +138,8 @@ let handleModifyTodoTitle= function(req,res){
   let todoTitle = req.body.todoTitle;
   user.modifyTodoTitle(todoTitle,todoId);
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -143,7 +150,8 @@ let handleModifyDescription= function(req,res){
   let todoDescription = req.body.todoDescription;
   user.modifyTodoDescription(todoDescription,todoId);
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -155,7 +163,8 @@ let handleModifyItem= function(req,res){
   let objective = req.body.objective;
   user.modifyTodoItem(todoId,itemId,objective);
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -166,7 +175,8 @@ let handleMarkTodoItem= function(req,res){
   let todoItemId= req.body.itemId;
   user.markTodoItem(todoId,todoItemId);
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 
@@ -177,7 +187,8 @@ let handleUnmarkTodoItem= function(req,res){
   let todoItemId= req.body.itemId;
   user.unmarkTodoItem(todoId,todoItemId);
   let todo=user.getTodo(todoId);
-  res.write(toS(todo));
+  let todohtml=generateHtmlFor.todo(todo);
+  res.write(todohtml);
   res.end();
 }
 

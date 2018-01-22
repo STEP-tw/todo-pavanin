@@ -17,11 +17,7 @@ let redirect = function(path){
   this.end();
 };
 const parseCookies = text=> {
-  try {
-    return text && text.split(';').map(toKeyValue).reduce(accumulate,{}) || {};
-  }catch(e){
-    return {};
-  }
+  return text && text.split(';').map(toKeyValue).reduce(accumulate,{})||{};
 }
 let invoke = function(req,res){
   let handler = this._handlers[req.method][req.url];
@@ -78,4 +74,5 @@ let create = ()=>{
   rh.use = use;
   return rh;
 }
+
 exports.create = create;
