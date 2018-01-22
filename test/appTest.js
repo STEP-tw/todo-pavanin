@@ -114,7 +114,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/getTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,`<h2 id='title'>newTodo</h2>`)
+        th.body_contains(res,`<h2 ondblclick='editTitle(this.id)' id='title'>newTodo</h2>`)
       })
       done();
     })
@@ -153,7 +153,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/modifyTodoTitle',body:`todoId=0&todoTitle=newtitle`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,`<h2 id='title'>newtitle</h2>`);
+        th.body_contains(res,`<h2 ondblclick='editTitle(this.id)' id='title'>newtitle</h2>`);
       })
       done();
     })
@@ -166,7 +166,7 @@ describe('app',()=>{
         })
         request(app,{method:'POST',url:'/modifyTodoDescription',body:`todoId=0&todoDescription=new`,headers:{cookie:"sessionid=0"}},(res)=>{
           th.status_is_ok(res);
-          th.body_contains(res,`<h4 id='description'>new</h4>`);
+          th.body_contains(res,`<h4 ondblclick='editDescription(this.id)' id='description'>new</h4>`);
         })
         done();
       })
@@ -198,7 +198,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/markItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,`type='checkbox' id=0 checked/>`);
+        th.body_contains(res,`<input onclick='changeStatus(this.id)' ondblclick='editItem(this.id)' type='checkbox' id=0 checked>`);
       })
       done();
     })
@@ -217,7 +217,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/unmarkItem',body:`todoId=0&itemId=0`,headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,`type='checkbox' id=0 unchecked/>`);
+        th.body_contains(res,`<input onclick='changeStatus(this.id)' ondblclick='editItem(this.id)' type='checkbox' id=0 unchecked>`);
       })
       done();
     })

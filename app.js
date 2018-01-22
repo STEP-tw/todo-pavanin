@@ -59,6 +59,7 @@ let logRequest = (req,res)=>{
     `COOKIES=> ${toS(req.cookies,null,2)}`,
     `BODY=> ${toS(req.body,null,2)}`,''].join('\n');
   app.fs.appendFile('request.log',text,()=>{});
+  console.log(`url => ${req.url} method => ${req.method}`);
 };
 
 let loadUser = (req,res)=>{
@@ -93,7 +94,7 @@ let handlePostLogin= (req,res)=>{
 let handleAddTodo= function(req,res){
   let user=app.session[req.user.userName]
   let title= req.body.title;
-  let description= req.body.description||"";
+  let description= req.body.description||"no description";
   user.addTodo(title,description);
   res.redirect("/todos");
 }

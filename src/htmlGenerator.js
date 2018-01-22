@@ -16,7 +16,7 @@ const generateHtmlFor = {
     let itemIds = Object.keys(todo.getItems());
     let itemsList = itemIds.reduce((accumulator,itemId)=>{
       let status = todo.getItemStatus(itemId) && 'checked' || 'unchecked';
-      accumulator += `<label for='${itemId}'>${todo.getItemObjective(itemId)}</label><input onclick='${onclickFunction}(this.id)' ondblclick='editItem(this.id)' type='checkbox' id=${itemId} ${status}/></br>`
+      accumulator += `<label for='${itemId}'>${todo.getItemObjective(itemId)}</label><input onclick='${onclickFunction}(this.id)' ondblclick='editItem(this.id)' type='checkbox' id=${itemId} ${status}></br>`
       return accumulator;
     },``);
 
