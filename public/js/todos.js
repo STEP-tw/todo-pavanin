@@ -57,12 +57,6 @@ const editDescription = function(id){
   document.getElementById(id).innerHTML = newDescription;
 }
 
-const editItem = function(id){
-  let objective = document.getElementById(id).innerText;
-  let newObjective = `<input id='newObjective' value='${objective}'/>`
-  document.getElementById(id).innerHTML = newObjective;
-}
-
 const modifyTitle = function(event){
   let url;
   let queryString;
@@ -94,8 +88,11 @@ const modifyDescription = function(event){
   let queryString;
   let todoId = +document.getElementById('todoId').textContent;
   let newDescription = document.getElementById('newDescription').value;
-  if(event.key=='Enter'){
+  if(event.key=='Enter'&& newDescription !=""){
     modifyTodoDescription(todoId,newDescription);
+  }
+  if(event.key=='Enter'&& newDescription ==""){
+    modifyTodoDescription(todoId,'no description');
   }
   if(event.key=='Escape'){
     getTodo(todoId);
@@ -111,6 +108,7 @@ const modifyTodoDescription = function (todoId,newDescription) {
   xmlReq.open('POST',url);
   xmlReq.send(queryString);
 }
+
 const deleteTodo = function(todoId) {
   console.log("in");
   url='/deleteTodo'
@@ -119,6 +117,44 @@ const deleteTodo = function(todoId) {
   xmlReq.addEventListener('load',loadTodoTitles);
   xmlReq.open('POST',url);
   xmlReq.send(queryString);
+  return;
+}
+
+const editItem = function (id) {
+  let oldObjective = document.getElementById(id).previousSibling.textContent;
+  let newObjective = `<input id="newObjective" type="text" value=${oldObjective} onkeydown="modifyObjective(event,${id})"></input>`;
+  document.getElementById(id).previousSibling.innerHTML=newObjective;
+  document.getElementById(id).style.visibility= 'hidden';
+}
+
+const modifyObjective = function(event,itemId){
+  let newObjective = document.getElementById('newObjective').value;
+  let todoId = +document.getElementById('todoId').textContent;
+  if(event.key=='Enter'&& newObjective !=""){
+    modifyTodoItem(todoId,itemId,newObjective);
+  }
+  if(event.key=='Enter'&& newObjective ==""){
+    deleteTodoItem(todoId,itemId)
+  }
+  if(event.key=='Escape'){
+    getTodo(todoId);
+    return;
+  }
+}
+
+const modifyTodoItem =function (todoId,itemId,objective) {
+  let xmlReq = new XMLHttpRequest();
+  xmlReq.addEventListener('load',displayTodo);
+  xmlReq.open('POST','/modifyTodoItem');
+  xmlReq.send(`todoId=${todoId}&itemId=${itemId}&objective=${objective}`);
+  return;
+}
+
+const deleteTodoItem =function (todoId,itemId) {
+  let xmlReq = new XMLHttpRequest();
+  xmlReq.addEventListener('load',displayTodo);
+  xmlReq.open('POST','/deleteTodoItem');
+  xmlReq.send(`todoId=${todoId}&itemId=${itemId}`);
   return;
 }
 
