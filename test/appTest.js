@@ -4,11 +4,20 @@ let request = require('./requestSimulator.js');
 let app = require('../app.js');
 let User = require('../src/user.js');
 let th = require('./testHelper.js');
+let MockFs= require("../mock.js")
 let registered_users= [{"userName":"pavani","sessionid":0},{"userName":"harshad","sessionid":1}];
-
+app.fs=new MockFs;
 app.registered_users = registered_users;
 
 describe('app',()=>{
+  before(()=>{
+      app.fs.addFile("./public/templates/login.html","login page")
+      app.fs.addFile("./public/templates/home.html","pavani")
+      app.fs.addFile("./public/templates/newTodo.html","<title>newTodo</title>")
+      app.fs.addFile("./public/templates/todos.html","pavani")
+      app.fs.addFile("./public/css/todos.css","div")
+      app.fs.addFile("request.log","")
+  })
   beforeEach(()=>{
     let session = {
       'pavani':new User('Pavani'),
@@ -25,7 +34,35 @@ describe('app',()=>{
     })
   })
 
-  describe("GET /login",()=>{
+  describe('GET /todos',()=>{
+    it("should redirect to login page if user is not logged in",()=>{
+      request(app,{method:"GET",url:"/todos"},(res)=>{
+        th.should_be_redirected_to(res,"/login")
+      })
+    })
+    it("should redirect to login page if cookie is invalid",()=>{
+      request(app,{method:"GET",url:"/todos",headers:{cookie:"loggedIn=true"}},(res)=>{
+        th.should_be_redirected_to(res,"/login")
+      })
+    })
+    it("should serve the todos page if cookie id valid",()=>{
+      request(app,{method:"GET",url:"/todos",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"pavani")
+      })
+    })
+  })
+
+  describe('GET /css/todos.css',()=>{
+    it("should serve the todos page if cookie id valid",()=>{
+      request(app,{method:"GET",url:"/css/todos.css",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"div")
+      })
+    })
+  })
+
+  describe("GET /login and /",()=>{
     it('should serve the login page when user isNot loggedIn',done=>{
       request(app,{method:'GET',url:'/login'},(res)=>{
         th.status_is_ok(res);
@@ -40,8 +77,21 @@ describe('app',()=>{
         done();
       })
     })
+    it('should serve the login page if the cookie is invalid',done=>{
+      request(app,{method:"GET",url:"/",headers:{cookie:"loggedIn=true"}},(res)=>{
+        th.status_is_ok(res);
+        th.body_contains(res,"login page");
+        done();
+      })
+    })
     it('should redirect to home page when user is valid and cookie is valid',done=>{
       request(app,{method:"GET",url:"/login",headers:{cookie:"sessionid=0"}},(res)=>{
+        th.should_be_redirected_to(res,"/home");
+        done();
+      })
+    })
+    it('should redirect to home page when user is valid and cookie is valid',done=>{
+      request(app,{method:"GET",url:"/",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/home");
         done();
       })

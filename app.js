@@ -1,10 +1,27 @@
 const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
-const fs= require("fs");
 const generateHtmlFor=require("./src/htmlGenerator.js");
 
 const toS=function(content){
   return JSON.stringify(content);
+}
+
+const getContentType = function(extension){
+  let contentType={
+    ".jpg":"img/jpg",
+    ".html":"text/html",
+    ".css":"text/css",
+    ".js":"text/javascript",
+    ".gif":"img/gif",
+    ".pdf":"text/pdf",
+    ".txt":"text/plain"
+  };
+  return contentType[extension] || "text/html";
+};
+
+let getPath= function(url){
+  if(url=="/") return "./public/login";
+  return "./public"+url;
 }
 
 let redirectToLoginIfNotLoggedIn=function(req,res){
@@ -23,6 +40,17 @@ let redirectToHomeIfLoggedIn= function(req,res){
   }
 }
 
+let serveStaticFiles= function (req,res) {
+  let path=getPath(req.url);
+  extension= path.slice(path.lastIndexOf("."));
+  let contentType=getContentType(extension);
+  if(!app.fs.existsSync(path))return;
+  res.setHeader("content-type",contentType);
+  res.write(app.fs.readFileSync(path));
+  res.end();
+  return;
+}
+
 let logRequest = (req,res)=>{
   let text = ['------------------------------',
     `${timeStamp()}`,
@@ -30,7 +58,7 @@ let logRequest = (req,res)=>{
     `HEADERS=> ${toS(req.headers,null,2)}`,
     `COOKIES=> ${toS(req.cookies,null,2)}`,
     `BODY=> ${toS(req.body,null,2)}`,''].join('\n');
-  fs.appendFile('request.log',text,()=>{});
+  app.fs.appendFile('request.log',text,()=>{});
 };
 
 let loadUser = (req,res)=>{
@@ -43,7 +71,7 @@ let loadUser = (req,res)=>{
 };
 
 let handleGetLogin=(req,res)=>{
-  let contents= fs.readFileSync("./login.html",'utf8');
+  let contents= app.fs.readFileSync("./public/templates/login.html",'utf8');
   res.setHeader('content-type',"text/html");
   res.write(contents.replace("_login_",req.cookies.message||""));
   res.end();
@@ -83,7 +111,7 @@ let handleAddTodoItem= function(req,res){
 }
 
 let handleNewTodo= function(req,res){
-  let contents= fs.readFileSync("./newTodo.html",'utf8');
+  let contents= app.fs.readFileSync("./public/templates/newTodo.html",'utf8');
   res.setHeader('content-type',"text/html");
   res.write(contents);
   res.end();
@@ -193,7 +221,15 @@ let handleUnmarkTodoItem= function(req,res){
 }
 
 let handleGetHome= function(req,res){
-    let contents= fs.readFileSync("./home.html",'utf8');
+    let contents= app.fs.readFileSync("./public/templates/home.html",'utf8');
+    res.setHeader('content-type',"text/html");
+    res.write(contents.replace("_userName_",req.user.userName));
+    res.end();
+    return;
+}
+
+let handleTodosView= function(req,res){
+    let contents= app.fs.readFileSync("./public/templates/todos.html",'utf8');
     res.setHeader('content-type',"text/html");
     res.write(contents.replace("_userName_",req.user.userName));
     res.end();
@@ -210,10 +246,12 @@ app.use(logRequest);
 app.use(loadUser);
 app.use(redirectToLoginIfNotLoggedIn)
 app.use(redirectToHomeIfLoggedIn)
+app.use(serveStaticFiles);
 app.get("/",handleGetLogin);
 app.get("/login",handleGetLogin);
 app.post("/login",handlePostLogin);
 app.get("/home",handleGetHome);
+app.get("/todos",handleTodosView);
 app.get("/logout",handleLogout);
 app.get("/newTodo",handleNewTodo);
 app.post("/addTodo",handleAddTodo);
