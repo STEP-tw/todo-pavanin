@@ -107,12 +107,12 @@ describe('app',()=>{
     })
   })
 
-  describe('GET /getTodo',()=>{
+  describe('post /getTodo',()=>{
     it("should give the particular todo of specified user",(done)=>{
       request(app,{method:'POST',url:'/addTodo',body:"title=newTodo&description=todoDesc",headers:{cookie:"sessionid=0"}},(res)=>{
         th.should_be_redirected_to(res,"/todos");
       })
-      request(app,{method:'GET',url:'/getTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
+      request(app,{method:'POST',url:'/getTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
         th.body_contains(res,`<h2 id='title'>newTodo</h2>`)
       })

@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <title>todos</title>
-  <script src="./css/todos.css" charset="utf-8"></script>
+  <link rel="stylesheet" href="/css/todos.css">
+  <script src="./js/todos.js"></script>
 </head>
 <body>
   _userName_
@@ -12,14 +13,12 @@
       <label id="message"></label>
       <a href="/logout">logout</a>
     </div>
-    <div id="contents">
-
-    </div>
+    <p id ='contents'></p>
     <div id="addTaskDiv">
     </div>
     <div id="addItem">
       <input type="text" name="" id="item">
-      <button type="button" onclick="addtask()">add task</button>
+      <button type="button" onclick="addTask()">add task</button>
       <button type="button"><a href="/newTodo">CREATE TODO</a></button>
     </div>
   </div>

@@ -121,7 +121,7 @@ let handleGetTodos= function(req,res){
   let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
   let user=app.session[registeredUser["userName"]];
   let allTodos=user.getTodos();
-  let todoTitles=generateHtmlFor.todoTitlesList(allTodos,"asdf");
+  let todoTitles=generateHtmlFor.todoTitlesList(allTodos,"getTodo");
   res.write(todoTitles);
   res.end();
 }
@@ -142,7 +142,7 @@ let handleDeleteTodo= function(req,res){
   let todoId= req.body.todoId;
   user.deleteTodo(todoId);
   let todos=user.getTodos();
-  let todoTitles=generateHtmlFor.todoTitlesList(todos,"asdf");
+  let todoTitles=generateHtmlFor.todoTitlesList(todos,"getTodo");
   res.write(todoTitles);
   res.end();
 }
@@ -256,7 +256,7 @@ app.get("/logout",handleLogout);
 app.get("/newTodo",handleNewTodo);
 app.post("/addTodo",handleAddTodo);
 app.get("/getTodos",handleGetTodos);
-app.get("/getTodo",handleGetTodo);
+app.post("/getTodo",handleGetTodo);
 app.post("/deleteTodo",handleDeleteTodo);
 app.post("/deleteTodoItem",handleDeleteTodoItem);
 app.post("/markItem",handleMarkTodoItem);

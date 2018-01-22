@@ -10,7 +10,7 @@ const generateHtmlFor = {
   },
 
   todo : function (todo,onclickFunction,ondblclickFunction) {
-    let idLabel = `<label id='todoId' value=${todo.getTodoId()}></label>`;
+    let idLabel = `<label id='todoId' class="invisible">${todo.getTodoId()}</label>`;
     let titleHeader = `<h2 id='title'>${todo.getTitle()}</h2>`;
     let descriptionHeader =`<h4 id='description'>${todo.getDescription()}</h4>`;
     let itemIds = Object.keys(todo.getItems());
