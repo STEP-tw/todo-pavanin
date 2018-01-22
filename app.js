@@ -1,15 +1,9 @@
 const WebApp = require('./webapp');
 const timeStamp = require('./time.js').timeStamp;
 const fs= require("fs");
-const User = require('./src/user.js');
+const generateHtmlFor=require("./src/htmlGenerator.js");
 const toS=function(content){
   return JSON.stringify(content);
-}
-let registered_users= [{"userName":"pavani","sessionid":0},{"userName":"harshad","sessionid":1}];
-
-let session = {
-  'pavani':new User('Pavani'),
-  'harshad':new User('harshad')
 }
 
 let redirectToLoginIfNotLoggedIn=function(req,res){
@@ -23,7 +17,7 @@ let redirectToLoginIfNotLoggedIn=function(req,res){
 let redirectToHomeIfLoggedIn= function(req,res){
   let urls=["/","/login"];
   let method="GET";
-  if(urls.includes(req.url)){
+  if(req.urlIsOneOf(urls)){
     req.user && res.redirect("/home")
   }
 }
@@ -40,7 +34,7 @@ let logRequest = (req,res)=>{
 
 let loadUser = (req,res)=>{
   let sessionid = req.cookies.sessionid;
-  let user = registered_users.find(u=>u.sessionid==sessionid);
+  let user = app.registered_users.find(u=>u.sessionid==sessionid);
   if(user&&sessionid){
     req.user = user;
   }
@@ -55,7 +49,7 @@ let handleGetLogin=(req,res)=>{
 }
 
 let handlePostLogin= (req,res)=>{
-  let user = registered_users.find(name=>name.userName==req.body.userName);
+  let user = app.registered_users.find(name=>name.userName==req.body.userName);
   if(!user) {
     res.setHeader('Set-Cookie',`message=loginFailed; Max-Age=5`);
     res.redirect('/login');
@@ -68,7 +62,7 @@ let handlePostLogin= (req,res)=>{
 }
 
 let handleAddTodo= function(req,res){
-  let user=session[req.user.userName]
+  let user=app.session[req.user.userName]
   let title= req.body.title;
   let description= req.body.description||"";
   user.addTodo(title,description);
@@ -76,8 +70,8 @@ let handleAddTodo= function(req,res){
 }
 
 let handleAddTodoItem= function(req,res){
-  let sessionid = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[sessionid["userName"]];
+  let sessionid = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[sessionid["userName"]];
   let todoId= req.body.todoId;
   let objective= req.body.objective;
   user.addTodoItem(objective,todoId);
@@ -93,16 +87,17 @@ let handleNewTodo= function(req,res){
 }
 
 let handleGetTodos= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let allTodos=user.getTodos();
-  res.write(toS(allTodos));
+  let todos=generateHtmlFor.todoTitlesList(allTodos,"asdf");
+  res.write(todos);
   res.end();
 }
 
 let handleGetTodo= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todo=user.getTodo(todoId);
   res.write(toS(todo));
@@ -110,8 +105,8 @@ let handleGetTodo= function(req,res){
 }
 
 let handleDeleteTodo= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   user.deleteTodo(todoId);
   let todos=user.getTodos();
@@ -120,8 +115,8 @@ let handleDeleteTodo= function(req,res){
 }
 
 let handleDeleteTodoItem= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let itemId = req.body.itemId;
   user.deleteTodoItem(todoId,itemId);
@@ -131,8 +126,8 @@ let handleDeleteTodoItem= function(req,res){
 }
 
 let handleModifyTodoTitle= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todoTitle = req.body.todoTitle;
   user.modifyTodoTitle(todoTitle,todoId);
@@ -142,8 +137,8 @@ let handleModifyTodoTitle= function(req,res){
 }
 
 let handleModifyDescription= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todoDescription = req.body.todoDescription;
   user.modifyTodoDescription(todoDescription,todoId);
@@ -153,8 +148,8 @@ let handleModifyDescription= function(req,res){
 }
 
 let handleModifyItem= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let itemId =  req.body.itemId;
   let objective = req.body.objective;
@@ -165,8 +160,8 @@ let handleModifyItem= function(req,res){
 }
 
 let handleMarkTodoItem= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todoItemId= req.body.itemId;
   user.markTodoItem(todoId,todoItemId);
@@ -176,8 +171,8 @@ let handleMarkTodoItem= function(req,res){
 }
 
 let handleUnmarkTodoItem= function(req,res){
-  let registeredUser = registered_users.find(name=>name.sessionid==req.cookies.sessionid);
-  let user=session[registeredUser["userName"]];
+  let registeredUser = app.registered_users.find(name=>name.sessionid==req.cookies.sessionid);
+  let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todoItemId= req.body.itemId;
   user.unmarkTodoItem(todoId,todoItemId);

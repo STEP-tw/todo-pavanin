@@ -16,7 +16,7 @@ Todo.prototype = {
   deleteItem:function(itemId){
     delete this.items[itemId];
   },
-  
+
   modifyItem:function(itemId,objective){
     let item = this.items[itemId];
     item.modify(objective);
@@ -57,9 +57,13 @@ Todo.prototype = {
     return item.isDone();
   },
 
+  getItemObjective:function(itemId){
+    return this.getItem(itemId).getObjective();
+  },
+
   getDescription:function(){
     return this.description;
-  }
+  },
 
 }
 module.exports=Todo;

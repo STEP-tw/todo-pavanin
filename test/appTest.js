@@ -4,8 +4,22 @@ let request = require('./requestSimulator.js');
 let app = require('../app.js');
 let User = require('../src/user.js');
 let th = require('./testHelper.js');
-
+let registered_users= [{"userName":"pavani","sessionid":0},{"userName":"harshad","sessionid":1}];
+let session = {
+  'pavani':new User('Pavani'),
+  'harshad':new User('harshad')
+}
+app.registered_users = registered_users;
+app.session = session;
 describe('app',()=>{
+
+  describe("bad url",()=>{
+    it("should give 404 error",()=>{
+      request(app,{method:"POST",url:"/sdfasd"},(res)=>{
+        th.status_is_not_found(res);
+      })
+    })
+  })
 
   describe("GET /login",()=>{
     it('should serve the login page when user isNot loggedIn',done=>{
@@ -59,7 +73,7 @@ describe('app',()=>{
       })
       request(app,{method:'GET',url:'/getTodos',headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'"title":"newTodo"')
+        th.body_contains(res,`<ul><li id=0 title='todoDesc'`)
       })
       done();
     })

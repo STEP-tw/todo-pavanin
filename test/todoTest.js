@@ -7,7 +7,14 @@ describe("todo",()=>{
   let todo
   beforeEach(()=>{
     todo = new Todo("0","title","description");
+    withOutDescription= new Todo("0","title");
   })
+  describe("empty description",()=>{
+    it("should give empty description",()=>{
+      assert.deepEqual(withOutDescription.getDescription(),"");
+    })
+  })
+
   describe("addItem",()=>{
     it("should addItem to the todo",()=>{
       let objective="firstItem";
@@ -25,6 +32,14 @@ describe("todo",()=>{
       expected[0]=new Item(first);
       expected[1]=new Item(second);
       assert.deepEqual(todo.getItems(),expected);
+    })
+  })
+
+  describe("getItemObjective",()=>{
+    it("should give the objective of the todo item",()=>{
+      let objective="firstItem";
+      todo.addItem(objective);
+      assert.deepEqual(todo.getItemObjective(0),objective);
     })
   })
 
