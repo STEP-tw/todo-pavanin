@@ -24,13 +24,24 @@ const displayTodo = function(){
 
 const addTask = function () {
   let objective = document.getElementById("item").value;
-  console.log(document.getElementById("todoId").value);
   let todoId =+document.getElementById("todoId").innerText;
-
   let xmlReq = new XMLHttpRequest();
   xmlReq.addEventListener('load',displayTodo);
   xmlReq.open('POST','/addTodoItem');
   xmlReq.send(`todoId=${todoId}&&objective=${objective}`);
+}
+
+const changeStatus= function(id){
+  let todoId = +document.getElementById("todoId").innerText;
+  let links = {
+    true : '/markItem',
+    false : '/unmarkItem'
+  }
+  let status = document.getElementById(id).checked;
+  let url =  links[status];
+  let xmlReq = new XMLHttpRequest();
+  xmlReq.open('POST',url);
+  xmlReq.send(`todoId=${todoId}&&itemId=${id}`);
 }
 
 window.onload = loadTodoTitles;

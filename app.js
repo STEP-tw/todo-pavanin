@@ -105,7 +105,7 @@ let handleAddTodoItem= function(req,res){
   let objective= req.body.objective;
   user.addTodoItem(objective,todoId);
   todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -131,7 +131,7 @@ let handleGetTodo= function(req,res){
   let user=app.session[registeredUser["userName"]];
   let todoId= req.body.todoId;
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -154,7 +154,7 @@ let handleDeleteTodoItem= function(req,res){
   let itemId = req.body.itemId;
   user.deleteTodoItem(todoId,itemId);
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -166,7 +166,7 @@ let handleModifyTodoTitle= function(req,res){
   let todoTitle = req.body.todoTitle;
   user.modifyTodoTitle(todoTitle,todoId);
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -178,7 +178,7 @@ let handleModifyDescription= function(req,res){
   let todoDescription = req.body.todoDescription;
   user.modifyTodoDescription(todoDescription,todoId);
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -191,7 +191,7 @@ let handleModifyItem= function(req,res){
   let objective = req.body.objective;
   user.modifyTodoItem(todoId,itemId,objective);
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -203,7 +203,7 @@ let handleMarkTodoItem= function(req,res){
   let todoItemId= req.body.itemId;
   user.markTodoItem(todoId,todoItemId);
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
@@ -215,7 +215,7 @@ let handleUnmarkTodoItem= function(req,res){
   let todoItemId= req.body.itemId;
   user.unmarkTodoItem(todoId,todoItemId);
   let todo=user.getTodo(todoId);
-  let todohtml=generateHtmlFor.todo(todo);
+  let todohtml=generateHtmlFor.todo(todo,"changeStatus");
   res.write(todohtml);
   res.end();
 }
