@@ -8,6 +8,7 @@ class MockFs{
   }
 
   readFileSync(fileName,encoding="utf8"){
+    if(!this.existsSync(fileName)) return 'no such file or directory';
     return this.files[fileName];
   }
 
@@ -18,6 +19,10 @@ class MockFs{
   appendFile(fileName,content,func){
     this.files[fileName]+=content;
     return func();
+  }
+
+  writeFileSync(fileName,content){
+    this.files[fileName] = content;
   }
 
 }

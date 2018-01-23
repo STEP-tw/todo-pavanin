@@ -246,7 +246,7 @@ describe('app',()=>{
       })
       request(app,{method:'POST',url:'/deleteTodo',body:"todoId=0",headers:{cookie:"sessionid=0"}},(res)=>{
         th.status_is_ok(res);
-        th.body_contains(res,'<ul></ul>')
+        th.body_contains(res,'<h4>no todos</h4>')
       })
       done();
     })

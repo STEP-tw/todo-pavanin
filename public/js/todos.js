@@ -20,6 +20,8 @@ const getTodo = function(id) {
 const displayTodo = function(){
   let todo = this.responseText;
   document.getElementById('contents').innerHTML = todo;
+  document.getElementById('item').style.visibility='visible';
+  document.getElementById('additem').style.visibility='visible';
 }
 
 const addTask = function () {
@@ -53,7 +55,7 @@ const editTitle = function(id){
 
 const editDescription = function(id){
   let description = document.getElementById(id).innerText;
-  let newDescription = `<input onkeydown='modifyDescription(event)' id='newDescription' value='${description}'/>`
+  let newDescription = `<input onkeydown='modifyDescription(event)' id='newDescription' onfocusout='reload()' value='${description}'/>`
   document.getElementById(id).innerHTML = newDescription;
 }
 
@@ -64,9 +66,11 @@ const modifyTitle = function(event){
   let newTitle = document.getElementById('newTitle').value;
   if(event.key=='Enter'&& newTitle !=""){
     modifyTodoTitle(todoId,newTitle);
+    return
   }
   if(event.key=='Enter'&& newTitle ==""){
     deleteTodo(todoId)
+    return;
   }
   if(event.key=='Escape'){
     getTodo(todoId);
@@ -110,11 +114,10 @@ const modifyTodoDescription = function (todoId,newDescription) {
 }
 
 const deleteTodo = function(todoId) {
-  console.log("in");
   url='/deleteTodo'
   queryString =`todoId=${todoId}`
   let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',loadTodoTitles);
+  xmlReq.addEventListener('load',displayTodoTitleList);
   xmlReq.open('POST',url);
   xmlReq.send(queryString);
   return;
@@ -122,11 +125,14 @@ const deleteTodo = function(todoId) {
 
 const editItem = function (id) {
   let oldObjective = document.getElementById(id).previousSibling.textContent;
-  let newObjective = `<input id="newObjective" type="text" value=${oldObjective} onkeydown="modifyObjective(event,${id})"></input>`;
+  let newObjective = `<input onfocusout='reload()' id="newObjective" type="text" value=${oldObjective} onkeydown="modifyObjective(event,${id})"></input>`;
   document.getElementById(id).previousSibling.innerHTML=newObjective;
   document.getElementById(id).style.visibility= 'hidden';
 }
-
+const reload = function () {
+  let todoId = +document.getElementById('todoId').textContent;
+  getTodo(todoId);
+}
 const modifyObjective = function(event,itemId){
   let newObjective = document.getElementById('newObjective').value;
   let todoId = +document.getElementById('todoId').textContent;

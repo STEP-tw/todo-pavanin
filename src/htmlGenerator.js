@@ -2,6 +2,7 @@
 const generateHtmlFor = {
   todoTitlesList : function (todos,eventFunction) {
     let todoIds=Object.keys(todos);
+    if(todoIds.length==0) return "<h4>no todos</h4>";
     let htmlCode=todoIds.reduce((accumulator,todoId)=>{
       let todo=todos[todoId];
       return accumulator+=`<li id=${todoId} title='${todo.getDescription()}' onclick='${eventFunction}(this.id)'>${todo.getTitle()}</li>`;
@@ -20,7 +21,7 @@ const generateHtmlFor = {
       return accumulator;
     },``);
 
-    return `${idLabel}</br>${titleHeader}</br>${descriptionHeader}</br>${itemsList}</br>`
+    return `${idLabel}${titleHeader}</br>${descriptionHeader}</br>${itemsList}</br>`
   }
 }
 
