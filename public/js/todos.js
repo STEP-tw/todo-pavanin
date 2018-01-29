@@ -1,8 +1,22 @@
 const loadTodoTitles = function () {
+  sendAjaxRequest("GET",'/getTodos',displayTodoTitleList);
+  return;
+}
+
+const sendAjaxRequest = function(method,url,callBack,reqBody=''){
   let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodoTitleList);
-  xmlReq.open('GET','/getTodos');
+  xmlReq.addEventListener('load',callBack);
+  xmlReq.open(method,url);
+  if(reqBody){
+    xmlReq.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
+    xmlReq.send(reqBody);
+    return;
+  }
   xmlReq.send();
+}
+
+const noAction = function () {
+
 }
 
 const displayTodoTitleList = function () {
@@ -11,10 +25,7 @@ const displayTodoTitleList = function () {
 }
 
 const getTodo = function(id) {
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodo);
-  xmlReq.open('POST','/getTodo');
-  xmlReq.send(`todoId=${id}`);
+  sendAjaxRequest("POST",'/getTodo',displayTodo,`todoId=${id}`);
 }
 
 const displayTodo = function(){
@@ -28,10 +39,8 @@ const addTask = function () {
   let objective = document.getElementById("item").value;
   let todoId =+document.getElementById("todoId").textContent;
   if(objective=="") return;
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodo);
-  xmlReq.open('POST','/addTodoItem');
-  xmlReq.send(`todoId=${todoId}&&objective=${objective}`);
+  let reqBody = `todoId=${todoId}&&objective=${objective}`;
+  sendAjaxRequest("POST",'/addTodoItem',displayTodo,reqBody)
 }
 
 const changeStatus= function(id){
@@ -40,11 +49,10 @@ const changeStatus= function(id){
     true : '/markItem',
     false : '/unmarkItem'
   }
+  let reqBody = `todoId=${todoId}&&itemId=${id}`;
   let status = document.getElementById(id).checked;
   let url =  links[status];
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.open('POST',url);
-  xmlReq.send(`todoId=${todoId}&&itemId=${id}`);
+  sendAjaxRequest("POST",url,noAction,reqBody);
 }
 
 const editTitle = function(id){
@@ -81,10 +89,7 @@ const modifyTitle = function(event){
 const modifyTodoTitle = function(todoId,newTitle) {
   url='/modifyTodoTitle'
   queryString =`todoTitle=${newTitle}&todoId=${todoId}`
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodo);
-  xmlReq.open('POST',url);
-  xmlReq.send(queryString);
+  sendAjaxRequest("POST",url,displayTodo,queryString);
 }
 
 const modifyDescription = function(event){
@@ -107,19 +112,13 @@ const modifyDescription = function(event){
 const modifyTodoDescription = function (todoId,newDescription) {
   url='/modifyTodoDescription'
   queryString =`todoDescription=${newDescription}&todoId=${todoId}`
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodo);
-  xmlReq.open('POST',url);
-  xmlReq.send(queryString);
+  sendAjaxRequest("POST",url,displayTodo,queryString);
 }
 
 const deleteTodo = function(todoId) {
   url='/deleteTodo'
-  queryString =`todoId=${todoId}`
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodoTitleList);
-  xmlReq.open('POST',url);
-  xmlReq.send(queryString);
+  queryString =`todoId=${todoId}`;
+  sendAjaxRequest("POST",url,displayTodoTitleList,queryString);
   return;
 }
 
@@ -149,18 +148,14 @@ const modifyObjective = function(event,itemId){
 }
 
 const modifyTodoItem =function (todoId,itemId,objective) {
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodo);
-  xmlReq.open('POST','/modifyTodoItem');
-  xmlReq.send(`todoId=${todoId}&itemId=${itemId}&objective=${objective}`);
+  let queryString = `todoId=${todoId}&itemId=${itemId}&objective=${objective}`;
+  sendAjaxRequest("POST",'/modifyTodoItem',displayTodo,queryString);
   return;
 }
 
 const deleteTodoItem =function (todoId,itemId) {
-  let xmlReq = new XMLHttpRequest();
-  xmlReq.addEventListener('load',displayTodo);
-  xmlReq.open('POST','/deleteTodoItem');
-  xmlReq.send(`todoId=${todoId}&itemId=${itemId}`);
+  let queryString = `todoId=${todoId}&itemId=${itemId}`;
+  sendAjaxRequest("POST",'/deleteTodoItem',displayTodo,queryString);
   return;
 }
 

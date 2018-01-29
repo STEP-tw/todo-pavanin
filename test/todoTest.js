@@ -10,8 +10,8 @@ describe("todo",()=>{
     withOutDescription= new Todo("0","title");
   })
   describe("empty description",()=>{
-    it("should give empty description",()=>{
-      assert.deepEqual(withOutDescription.getDescription(),"");
+    it("should give 'no description' if not specified",()=>{
+      assert.deepEqual(withOutDescription.getDescription(),"no description");
     })
   })
   describe("getTodoId",()=>{

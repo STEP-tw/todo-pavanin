@@ -2,7 +2,7 @@ const Item = require('./item.js');
 const Todo = function(id,title,description) {
   this.id=id;
   this.title = title;
-  this.description = description ||"" ;
+  this.description = description ||"no description" ;
   this.items = {};
   this.itemId=0;
 }

@@ -7,18 +7,21 @@
   <script src="./js/todos.js"></script>
 </head>
 <body>
+
   <div class="">
     <div id="header">
       _userName_ <a href="/logout">logout</a>
     </div>
-    <p id ='contents'></p>
-    <div id="addTaskDiv">
+    <center>
+      <p id ='contents'></p>
+      <div id="addTaskDiv">
+      </div>
+      <div id="addItem">
+        <input  type="text" name="" id="item">
+        <button  type="button" onclick="addTask()" id='additem'>add task</button></br></br>
+        <a href="/newTodo">CREATE TODO</a>
+      </div>
     </div>
-    <div id="addItem">
-      <input  type="text" name="" id="item">
-      <button  type="button" onclick="addTask()" id='additem'>add task</button></br></br>
-      <a href="/newTodo">CREATE TODO</a>
-    </div>
-  </div>
+    </center>
 </body>
 </html>

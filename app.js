@@ -1,57 +1,33 @@
-const WebApp = require('./webapp');
+const express = require('express');
 const timeStamp = require('./time.js').timeStamp;
 const generateHtmlFor=require("./src/htmlGenerator.js");
-
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const toS=function(content){
   return JSON.stringify(content);
 }
 
-const getContentType = function(extension){
-  let contentType={
-    ".jpg":"img/jpg",
-    ".html":"text/html",
-    ".css":"text/css",
-    ".js":"text/javascript",
-    ".gif":"img/gif",
-    ".pdf":"text/pdf",
-    ".txt":"text/plain"
-  };
-  return contentType[extension] || "text/html";
-};
-
-let getPath= function(url){
-  if(url=="/") return "./public/login";
-  return "./public"+url;
-}
-
-let redirectToLoginIfNotLoggedIn=function(req,res){
+let redirectToLoginIfNotLoggedIn=function(req,res,next){
   let urls=["/","/login"];
   let method="GET";
-  if(method==req.method&&!urls.includes(req.url)){
-    !req.user && res.redirect("/login")
+  if(!req.user&&method==req.method&&!urls.includes(req.url)){
+    res.redirect("/login");
+    return;
   }
+  next();
 }
 
-let redirectToHomeIfLoggedIn= function(req,res){
+let redirectToHomeIfLoggedIn= function(req,res,next){
   let urls=["/","/login"];
   let method="GET";
-  if(req.urlIsOneOf(urls)){
-    req.user && res.redirect("/home")
+  if(urls.includes(req.url) && req.user){
+    res.redirect("/home")
+    return;
   }
+  next();
 }
 
-let serveStaticFiles= function (req,res) {
-  let path=getPath(req.url);
-  extension= path.slice(path.lastIndexOf("."));
-  let contentType=getContentType(extension);
-  if(!app.fs.existsSync(path))return;
-  res.setHeader("content-type",contentType);
-  res.write(app.fs.readFileSync(path));
-  res.end();
-  return;
-}
-
-let logRequest = (req,res)=>{
+let logRequest = (req,res,next)=>{
   let text = ['------------------------------',
     `${timeStamp()}`,
     `${toS(req.method,null,2)} ${toS(req.url,null,2)}`,
@@ -60,33 +36,33 @@ let logRequest = (req,res)=>{
     `BODY=> ${toS(req.body,null,2)}`,''].join('\n');
   app.fs.appendFile('request.log',text,()=>{});
   console.log(`url => ${req.url} method => ${req.method}`);
+  next();
 };
 
-let loadUser = (req,res)=>{
+let loadUser = (req,res,next)=>{
   let sessionid = req.cookies.sessionid;
   let user = app.registered_users.find(u=>u.sessionid==sessionid);
   if(user&&sessionid){
     req.user = user;
   }
-
+  next();
 };
 
 let handleGetLogin=(req,res)=>{
   let contents= app.fs.readFileSync("./public/templates/login.html",'utf8');
-  res.setHeader('content-type',"text/html");
-  res.write(contents.replace("_login_",req.cookies.message||""));
-  res.end();
+  res.set('content-type',"text/html");
+  res.send(contents.replace("_login_",req.cookies.message||""));
 }
 
 let handlePostLogin= (req,res)=>{
   let user = app.registered_users.find(name=>name.userName==req.body.userName);
   if(!user) {
-    res.setHeader('Set-Cookie',`message=loginFailed; Max-Age=5`);
+    res.set('Set-Cookie',`message=Login Failed; Max-Age=5`);
     res.redirect('/login');
     return;
   }
   let sessionId = new Date().getTime();
-  res.setHeader("Set-Cookie",`sessionid=${sessionId}`);
+  res.set("Set-Cookie",`sessionid=${sessionId}`);
   user.sessionid=sessionId;
   res.redirect("/home");
 }
@@ -94,7 +70,7 @@ let handlePostLogin= (req,res)=>{
 let handleAddTodo= function(req,res){
   let user=app.session[req.user.userName]
   let title= req.body.title;
-  let description= req.body.description||"no description";
+  let description= req.body.description;
   user.addTodo(title,description);
   res.redirect("/todos");
 }
@@ -107,15 +83,13 @@ let handleAddTodoItem= function(req,res){
   user.addTodoItem(objective,todoId);
   todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleNewTodo= function(req,res){
   let contents= app.fs.readFileSync("./public/templates/newTodo.html",'utf8');
-  res.setHeader('content-type',"text/html");
-  res.write(contents);
-  res.end();
+  res.set('content-type',"text/html");
+  res.send(contents);
 }
 
 let handleGetTodos= function(req,res){
@@ -123,8 +97,8 @@ let handleGetTodos= function(req,res){
   let user=app.session[registeredUser["userName"]];
   let allTodos=user.getTodos();
   let todoTitles=generateHtmlFor.todoTitlesList(allTodos,"getTodo");
-  res.write(todoTitles);
-  res.end();
+  res.set('Content-Type', 'text/html');
+  res.send(todoTitles);
 }
 
 let handleGetTodo= function(req,res){
@@ -133,8 +107,8 @@ let handleGetTodo= function(req,res){
   let todoId= req.body.todoId;
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.set('Content-Type', 'text/html');
+  res.send(todohtml);
 }
 
 let handleDeleteTodo= function(req,res){
@@ -144,8 +118,8 @@ let handleDeleteTodo= function(req,res){
   user.deleteTodo(todoId);
   let todos=user.getTodos();
   let todoTitles=generateHtmlFor.todoTitlesList(todos,"getTodo");
-  res.write(todoTitles);
-  res.end();
+  res.set('Content-Type', 'text/html');
+  res.send(todoTitles);
 }
 
 let handleDeleteTodoItem= function(req,res){
@@ -156,8 +130,7 @@ let handleDeleteTodoItem= function(req,res){
   user.deleteTodoItem(todoId,itemId);
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleModifyTodoTitle= function(req,res){
@@ -168,8 +141,7 @@ let handleModifyTodoTitle= function(req,res){
   user.modifyTodoTitle(todoTitle,todoId);
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleModifyDescription= function(req,res){
@@ -180,8 +152,7 @@ let handleModifyDescription= function(req,res){
   user.modifyTodoDescription(todoDescription,todoId);
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleModifyItem= function(req,res){
@@ -193,8 +164,7 @@ let handleModifyItem= function(req,res){
   user.modifyTodoItem(todoId,itemId,objective);
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleMarkTodoItem= function(req,res){
@@ -205,8 +175,7 @@ let handleMarkTodoItem= function(req,res){
   user.markTodoItem(todoId,todoItemId);
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleUnmarkTodoItem= function(req,res){
@@ -217,37 +186,40 @@ let handleUnmarkTodoItem= function(req,res){
   user.unmarkTodoItem(todoId,todoItemId);
   let todo=user.getTodo(todoId);
   let todohtml=generateHtmlFor.todo(todo,"changeStatus");
-  res.write(todohtml);
-  res.end();
+  res.send(todohtml);
 }
 
 let handleGetHome= function(req,res){
     let contents= app.fs.readFileSync("./public/templates/home.html",'utf8');
-    res.setHeader('content-type',"text/html");
-    res.write(contents.replace("_userName_",req.user.userName));
-    res.end();
+    res.set('content-type',"text/html");
+    res.send(contents.replace("_userName_",req.user.userName));
+
     return;
 }
 
 let handleTodosView= function(req,res){
     let contents= app.fs.readFileSync("./public/templates/todos.html",'utf8');
-    res.setHeader('content-type',"text/html");
-    res.write(contents.replace("_userName_",req.user.userName));
-    res.end();
+    res.set('content-type',"text/html");
+    res.send(contents.replace("_userName_",req.user.userName));
+
     return;
 }
 
 let handleLogout= function(req,res){
-  res.setHeader("Set-Cookie",`sessionid=0; Max-Age=0`)
+  res.set("Set-Cookie",`sessionid=0; Max-Age=0`)
   res.redirect("/");
 }
 
-const app = WebApp.create();
+
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static('public'))
 app.use(logRequest);
 app.use(loadUser);
 app.use(redirectToLoginIfNotLoggedIn)
 app.use(redirectToHomeIfLoggedIn)
-app.use(serveStaticFiles);
 app.get("/",handleGetLogin);
 app.get("/login",handleGetLogin);
 app.post("/login",handlePostLogin);
